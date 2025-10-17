@@ -1,3 +1,4 @@
+import { add } from "lodash";
 import React, { useState } from "react";
 
 export const MoviesContext = React.createContext(null);
@@ -5,6 +6,7 @@ export const MoviesContext = React.createContext(null);
 const MoviesContextProvider = (props) => {
   const [favorites, setFavorites] = useState( [] )
   const [myReviews, setMyReviews] = useState( {} ) 
+  const [watchlist, setWatchlist] = useState( [] )
 
   const addToFavorites = (movie) => {
     let newFavorites = [];
@@ -16,6 +18,17 @@ const MoviesContextProvider = (props) => {
     }
     setFavorites(newFavorites)
   };
+
+  const addToWatchlist = (movie) => {
+    let newWatchlist = [];
+    if (!watchlist.includes(movie.id)){
+      newWatchlist = [...watchlist, movie.id];
+    }
+    else{
+      newWatchlist = [...watchlist];
+    }
+    setWatchlist(newWatchlist)
+  };  
   
   // We will use this function in the next step
   const removeFromFavorites = (movie) => {
@@ -27,7 +40,15 @@ const MoviesContextProvider = (props) => {
   const addReview = (movie, review) => {
     setMyReviews( {...myReviews, [movie.id]: review } )
   };
+  
   //console.log(myReviews);
+  console.log(watchlist);
+  
+  const removeFromWatchlist = (movie) => {
+    setWatchlist( watchlist.filter(
+      (mId) => mId !== movie.id
+    ) )
+  };
 
   return (
     <MoviesContext.Provider
@@ -35,7 +56,8 @@ const MoviesContextProvider = (props) => {
         favorites,
         addToFavorites,
         removeFromFavorites,
-        removeFromFavorites,
+        addToWatchlist,
+        removeFromWatchlist,
         addReview,
       }}
     >

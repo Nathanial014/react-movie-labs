@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useContext } from "react";
 import IconButton from "@mui/material/IconButton";
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import { MoviesContext } from "../../contexts/moviesContext";
 
 const AddToWatchIcon = ({ movie }) => {
+  const context = useContext(MoviesContext);
+
   const handleClick = (e) => {
-    // no-op for now; placeholder for "add to watch" action
     e.preventDefault();
+    if (context && context.addToWatchlist) {
+      context.addToWatchlist(movie);
+    }
   };
 
   return (
