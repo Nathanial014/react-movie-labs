@@ -16,7 +16,7 @@ import Grid from "@mui/material/Grid";
 import Avatar from '@mui/material/Avatar';
 import img from '../../images/film-poster-placeholder.png'
 
-export default function MovieCard({ movie, action }) {
+export default function MovieCard({ movie, action, fullHeight = false, cardLink = null }) {
   const { favorites, addToFavorites } = useContext(MoviesContext);
 
   if (favorites.find((id) => id === movie.id)) {
@@ -30,8 +30,15 @@ export default function MovieCard({ movie, action }) {
     addToFavorites(movie);
   };
 
-  return (
-    <Card>
+  const actionContent = action ? action(movie) : null;
+  const cardActionsSx = fullHeight
+    ? { marginTop: 'auto', justifyContent: actionContent ? 'space-between' : 'center' }
+    : undefined;
+
+  const showDetailLink = !cardLink;
+
+  const cardInner = (
+    <Card sx={ fullHeight ? { height: '100%', display: 'flex', flexDirection: 'column' } : undefined }>
       <CardHeader
         avatar={
           movie.favorite ? (
@@ -41,20 +48,20 @@ export default function MovieCard({ movie, action }) {
           ) : null
         }
         title={
-          <Typography variant="h5" component="p">
+          <Typography variant="h6" component="p">
             {movie.title}{" "}
           </Typography>
         }
       />
       <CardMedia
-        sx={{ height: 500 }}
+        sx={ fullHeight ? { height: 280 } : { height: 500 } }
         image={
           movie.poster_path
             ? `https://image.tmdb.org/t/p/w500/${movie.poster_path}`
             : img
         }
       />
-      <CardContent>
+      <CardContent sx={ fullHeight ? { flex: '1 1 auto' } : undefined }>
         <Grid container>
           <Grid size={{xs: 6}}>
             <Typography variant="h6" component="p">
@@ -70,17 +77,28 @@ export default function MovieCard({ movie, action }) {
           </Grid>
         </Grid>
       </CardContent>
-      <CardActions disableSpacing>
-      
-        {action(movie)}
-      
-        <Link to={`/movies/${movie.id}`}>
-          <Button variant="outlined" size="medium" color="primary">
-            More Info ...
-          </Button>
-        </Link>
-        
+      <CardActions disableSpacing sx={ cardActionsSx }>
+        {actionContent}
+
+        {showDetailLink && (
+          <Link to={`/movies/${movie.id}`}>
+            <Button variant="outlined" size="medium" color="primary">
+              More Info ...
+            </Button>
+          </Link>
+        )}
+
       </CardActions>
     </Card>
   );
+
+  if (cardLink) {
+    return (
+      <Link to={cardLink} style={{ textDecoration: 'none', color: 'inherit' }}>
+        {cardInner}
+      </Link>
+    );
+  }
+
+  return cardInner;
 }
