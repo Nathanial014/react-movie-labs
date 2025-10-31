@@ -30,7 +30,7 @@ const MoviesPage = (props) => {
   const addToFavorites = (movieId) => true 
 
      return (
-      <PageTemplate background={true}
+      <PageTemplate
         title="Discover Movies"
         movies={movies}
         action={(movie) => {
