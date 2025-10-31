@@ -1,5 +1,5 @@
 import React from "react";
-import { getMovies } from "../api/tmdb-api";
+import { getMoviesPages } from "../api/tmdb-api";
 import PageTemplate from '../components/templateMovieListPage';
 import { useQuery } from '@tanstack/react-query';
 import Spinner from '../components/spinner';
@@ -7,9 +7,11 @@ import AddToFavoritesIcon from '../components/cardIcons/addToFavorites'
 
 const MoviesPage = (props) => {
 
+  // how many TMDB pages to request and merge (each TMDB page returns 20 items)
+  const pagesToFetch = 3; // -> 60 movies fetched; change this value to increase/decrease
   const { data, error, isPending, isError  } = useQuery({
-    queryKey: ['discover'],
-    queryFn: getMovies,
+    queryKey: ['discover', pagesToFetch],
+    queryFn: () => getMoviesPages(pagesToFetch),
   })
   
   if (isPending) {
@@ -28,7 +30,7 @@ const MoviesPage = (props) => {
   const addToFavorites = (movieId) => true 
 
      return (
-      <PageTemplate
+      <PageTemplate background={true}
         title="Discover Movies"
         movies={movies}
         action={(movie) => {

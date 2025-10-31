@@ -7,9 +7,10 @@ import { Link } from "react-router";
 
 const HomePage = (props) => {
 
+  // fetch first page only for homepage sample; use a distinct query key to avoid colliding with the full-list query
   const { data, error, isPending, isError  } = useQuery({
-    queryKey: ['discover'],
-    queryFn: getMovies,
+    queryKey: ['discover', 1, 'home'],
+    queryFn: () => getMovies(1),
   })
   
   if (isPending) {
