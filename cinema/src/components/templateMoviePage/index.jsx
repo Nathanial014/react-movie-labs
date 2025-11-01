@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import Spinner from '../spinner'
 import MovieHeader from "../headerMovie";
 import Grid from "@mui/material/Grid";
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import { MoviesContext } from '../../contexts/moviesContext';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { getMovieImages } from "../../api/tmdb-api";
@@ -77,6 +79,10 @@ const TemplateMoviePage = ({ movie, children }) => {
                     <Box key={idx} onClick={() => setCurrent(idx)} sx={{ width: 8, height: 8, borderRadius: '50%', background: idx === current ? 'white' : 'rgba(255,255,255,0.3)', cursor: 'pointer' }} />
                   ))}
                 </Box>
+                {/* Favorite button under carousel */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                  <FavoriteButton movie={movie} />
+                </Box>
               </Box>
             )}
           </Box>
@@ -89,5 +95,25 @@ const TemplateMoviePage = ({ movie, children }) => {
     </>
   );
 };
+
+function FavoriteButton({ movie }) {
+  const { favorites = [], addToFavorites, removeFromFavorites } = useContext(MoviesContext) || {};
+  const isFav = Array.isArray(favorites) && favorites.includes(movie.id);
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    if (isFav) {
+      removeFromFavorites && removeFromFavorites(movie);
+    } else {
+      addToFavorites && addToFavorites(movie);
+    }
+  };
+
+  return (
+    <IconButton aria-label="toggle-favorite" onClick={handleClick} sx={{ background: 'rgba(255,255,255,0.06)', color: isFav ? '#ff4081' : 'white' }}>
+      <FavoriteIcon />
+    </IconButton>
+  );
+}
 
 export default TemplateMoviePage;
