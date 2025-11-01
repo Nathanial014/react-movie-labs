@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import TextField from "@mui/material/TextField";
+import Autocomplete from '@mui/material/Autocomplete';
 import SearchIcon from "@mui/icons-material/Search";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
@@ -59,6 +60,9 @@ export default function FilterMoviesCard(props) {
     // close dropdown if requested (genre selection or apply)
     if (options.close) setOpen(false);
   };
+
+  // build autocomplete options from passed allMovies
+  const titleOptions = props.allMovies && Array.isArray(props.allMovies) ? [...new Set(props.allMovies.map(m => m.title).filter(Boolean))] : [];
 
   const handleTextChange = (e) => {
     handleChange('name', e.target.value);
@@ -115,16 +119,59 @@ export default function FilterMoviesCard(props) {
                 Filter the movies.
               </Typography>
               <Box sx={{ mt: 2 }}>
-                <TextField
-                  sx={{...formControl}}
-                  id="filled-search"
-                  label="Search field"
-                  type="search"
-                  variant="filled"
+                <Autocomplete
+                  freeSolo
+                  options={titleOptions}
                   value={props.titleFilter}
-                  onChange={handleTextChange}
-                  fullWidth
-                  onKeyDown={(e) => { if (e.key === 'Enter') setOpen(false); }}
+                  onInputChange={(e, val) => handleChange('name', val)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      sx={{...formControl}}
+                      id="filled-search"
+                      label="Search field"
+                      type="search"
+                      variant="filled"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+              <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
+                {/* Year filter */}
+                <FormControl sx={{...formControl, minWidth: 160}} variant="filled">
+                  <InputLabel id="year-label">Year</InputLabel>
+                  <Select
+                    labelId="year-label"
+                    id="year-select"
+                    value={props.yearFilter || '0'}
+                    onChange={(e) => handleChange('year', e.target.value)}
+                    fullWidth
+                  >
+                    <MenuItem value={'0'}>All</MenuItem>
+                    {[...new Set((props.allMovies||[]).map(m => m.release_date ? new Date(m.release_date).getFullYear() : null).filter(Boolean))].sort((a,b) => b-a).map(y => (
+                      <MenuItem key={y} value={String(y)}>{y}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                {/* Runtime min/max */}
+                <TextField
+                  sx={{...formControl, minWidth: 120}}
+                  id="runtime-min"
+                  label="Min runtime (min)"
+                  type="number"
+                  variant="filled"
+                  value={props.runtimeFilter?.min || 0}
+                  onChange={(e) => handleChange('runtime', { ...props.runtimeFilter, min: Number(e.target.value) })}
+                />
+                <TextField
+                  sx={{...formControl, minWidth: 120}}
+                  id="runtime-max"
+                  label="Max runtime (min)"
+                  type="number"
+                  variant="filled"
+                  value={props.runtimeFilter?.max || 0}
+                  onChange={(e) => handleChange('runtime', { ...props.runtimeFilter, max: Number(e.target.value) })}
                 />
               </Box>
               <Box sx={{ mt: 2 }}>

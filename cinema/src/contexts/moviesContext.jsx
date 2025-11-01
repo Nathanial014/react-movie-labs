@@ -8,11 +8,13 @@ const MoviesContextProvider = (props) => {
   const [favorites, setFavorites] = useState( [] )
   const [myReviews, setMyReviews] = useState( {} ) 
   const [watchlist, setWatchlist] = useState( [] )
+  const [ratings, setRatings] = useState( {} )
 
   const auth = useContext(AuthContext);
 
   // persist favorites per authenticated user (or guest)
   const favStorageKey = auth && auth.user && auth.user.email ? `favorites_${auth.user.email}` : 'favorites_guest';
+  const ratingsStorageKey = auth && auth.user && auth.user.email ? `ratings_${auth.user.email}` : 'ratings_guest';
 
   useEffect(() => {
     try {
@@ -29,9 +31,25 @@ const MoviesContextProvider = (props) => {
 
   useEffect(() => {
     try {
+      const raw = localStorage.getItem(ratingsStorageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') setRatings(parsed);
+      }
+    } catch (e) {}
+  }, [ratingsStorageKey]);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(favStorageKey, JSON.stringify(favorites));
     } catch (e) {}
   }, [favorites, favStorageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ratingsStorageKey, JSON.stringify(ratings));
+    } catch (e) {}
+  }, [ratings, ratingsStorageKey]);
 
   const addToFavorites = (movie) => {
     let newFavorites = favorites.slice();
@@ -60,6 +78,14 @@ const MoviesContextProvider = (props) => {
   const addReview = (movie, review) => {
     setMyReviews( {...myReviews, [movie.id]: review } )
   };
+
+  const addRating = (movie, value) => {
+    setRatings({ ...ratings, [movie.id]: value });
+  };
+
+  const getRating = (movie) => {
+    return ratings[movie.id] || null;
+  };
   
   //console.log(myReviews);
   console.log(watchlist);
@@ -79,6 +105,9 @@ const MoviesContextProvider = (props) => {
         addToWatchlist,
         removeFromWatchlist,
         addReview,
+        ratings,
+        addRating,
+        getRating,
       }}
     >
       {props.children}

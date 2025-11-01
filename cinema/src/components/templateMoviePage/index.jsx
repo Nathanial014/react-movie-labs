@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { MoviesContext } from '../../contexts/moviesContext';
+import Rating from '@mui/material/Rating';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { getMovieImages } from "../../api/tmdb-api";
@@ -79,9 +80,10 @@ const TemplateMoviePage = ({ movie, children }) => {
                     <Box key={idx} onClick={() => setCurrent(idx)} sx={{ width: 8, height: 8, borderRadius: '50%', background: idx === current ? 'white' : 'rgba(255,255,255,0.3)', cursor: 'pointer' }} />
                   ))}
                 </Box>
-                {/* Favorite button under carousel */}
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                {/* Favorite and rating controls under carousel */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1, alignItems: 'center' }}>
                   <FavoriteButton movie={movie} />
+                  <RatingControl movie={movie} />
                 </Box>
               </Box>
             )}
@@ -113,6 +115,35 @@ function FavoriteButton({ movie }) {
     <IconButton aria-label="toggle-favorite" onClick={handleClick} sx={{ background: 'rgba(255,255,255,0.06)', color: isFav ? '#ff4081' : 'white' }}>
       <FavoriteIcon />
     </IconButton>
+  );
+}
+
+function RatingControl({ movie }) {
+  const { addRating, getRating } = useContext(MoviesContext) || {};
+  const current = getRating ? getRating(movie) : null;
+  const [value, setValue] = useState(current || 0);
+
+  // sync if underlying value changed
+  React.useEffect(() => {
+    if (getRating) {
+      const r = getRating(movie) || 0;
+      setValue(r);
+    }
+  }, [getRating, movie]);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+    addRating && addRating(movie, newValue);
+  };
+
+  return (
+    <Rating
+      name={`rating-${movie.id}`}
+      value={value}
+      precision={0.5}
+      onChange={handleChange}
+      sx={{ color: '#ffb400' }}
+    />
   );
 }
 
