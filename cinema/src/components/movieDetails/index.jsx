@@ -4,6 +4,7 @@ import Paper from "@mui/material/Paper";
 import Box from '@mui/material/Box';
 import { useQuery } from '@tanstack/react-query';
 import { getMovieVideos } from '../../api/tmdb-api';
+import { getMovieCredits } from '../../api/tmdb-api';
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MonetizationIcon from "@mui/icons-material/MonetizationOn";
 import StarRate from "@mui/icons-material/StarRate";
@@ -45,6 +46,8 @@ const MovieDetails = ({ movie }) => {  // Don't miss this!
 
       {/* Trailers */}
       <TrailerSection movieId={movie.id} />
+  {/* Credits / Cast */}
+  <CreditsSection movieId={movie.id} />
       <Paper
         component="ul"
         sx={{ ...root, backgroundColor: 'rgba(0,0,0,0.6)', boxShadow: '0 2px 8px rgba(0,0,0,0.5)', borderRadius: 1 }}
@@ -134,6 +137,39 @@ function TrailerSection({ movieId }) {
           allowFullScreen
           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
         />
+      </Box>
+    </Box>
+  );
+}
+
+function CreditsSection({ movieId }) {
+  const { data, error, isPending, isError } = useQuery({
+    queryKey: ['credits', { id: movieId }],
+    queryFn: getMovieCredits,
+    enabled: !!movieId,
+  });
+
+  if (isPending) return null;
+  if (isError) return null;
+
+  const credits = data && data.cast ? data.cast : [];
+  if (!credits || credits.length === 0) return null;
+
+  return (
+    <Box sx={{ my: 2 }}>
+      <Typography variant="h6" component="h4" sx={{ mb: 1 }}>Cast</Typography>
+      <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
+        {credits.slice(0, 20).map((c) => (
+          <Box key={c.cast_id || c.credit_id} sx={{ minWidth: 120, textAlign: 'center' }}>
+            <img
+              src={c.profile_path ? `https://image.tmdb.org/t/p/w185/${c.profile_path}` : '/public/no-image.png'}
+              alt={c.name}
+              style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+            />
+            <Typography variant="body2" sx={{ color: 'white' }}>{c.name}</Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>{c.character}</Typography>
+          </Box>
+        ))}
       </Box>
     </Box>
   );
