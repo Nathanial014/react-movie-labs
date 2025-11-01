@@ -3,8 +3,7 @@ import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Box from '@mui/material/Box';
 import { useQuery } from '@tanstack/react-query';
-import { getMovieVideos } from '../../api/tmdb-api';
-import { getMovieCredits } from '../../api/tmdb-api';
+import { getMovieVideos, getMovieCredits, getMovieRecommendations } from '../../api/tmdb-api';
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import MonetizationIcon from "@mui/icons-material/MonetizationOn";
 import StarRate from "@mui/icons-material/StarRate";
@@ -44,10 +43,12 @@ const MovieDetails = ({ movie }) => {  // Don't miss this!
         {movie.overview}
       </Typography>
 
-      {/* Trailers */}
-      <TrailerSection movieId={movie.id} />
-  {/* Credits / Cast */}
-  <CreditsSection movieId={movie.id} />
+        {/* Trailers */}
+        <TrailerSection movieId={movie.id} />
+      {/* Credits / Cast */}
+      <CreditsSection movieId={movie.id} />
+      {/* Recommendations */}
+      <RecommendationsSection movieId={movie.id} />
       <Paper
         component="ul"
         sx={{ ...root, backgroundColor: 'rgba(0,0,0,0.6)', boxShadow: '0 2px 8px rgba(0,0,0,0.5)', borderRadius: 1 }}
@@ -169,6 +170,40 @@ function CreditsSection({ movieId }) {
               />
               <Typography variant="body2" sx={{ color: 'white' }}>{c.name}</Typography>
               <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>{c.character}</Typography>
+            </a>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+}
+
+function RecommendationsSection({ movieId }) {
+  const { data, error, isPending, isError } = useQuery({
+    queryKey: ['recommendations', { id: movieId }],
+    queryFn: getMovieRecommendations,
+    enabled: !!movieId,
+  });
+
+  if (isPending) return null;
+  if (isError) return null;
+
+  const recs = data && data.results ? data.results : [];
+  if (!recs || recs.length === 0) return null;
+
+  return (
+    <Box sx={{ my: 2 }}>
+      <Typography variant="h6" component="h4" sx={{ mb: 1 }}>You may also like</Typography>
+      <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
+        {recs.slice(0, 12).map((m) => (
+          <Box key={m.id} sx={{ minWidth: 140, textAlign: 'center' }}>
+            <a href={`/movies/${m.id}`} style={{ textDecoration: 'none' }}>
+              <img
+                src={m.poster_path ? `https://image.tmdb.org/t/p/w185/${m.poster_path}` : '/no-image.png'}
+                alt={m.title}
+                style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: 8 }}
+              />
+              <Typography variant="body2" sx={{ color: 'white' }}>{m.title}</Typography>
             </a>
           </Box>
         ))}
