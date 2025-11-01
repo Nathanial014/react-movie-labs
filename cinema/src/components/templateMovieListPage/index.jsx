@@ -6,13 +6,23 @@ import Grid from "@mui/material/Grid";
 import Pagination from '@mui/material/Pagination';
 import Box from '@mui/material/Box';
 
-function MovieListPageTemplate({ movies, title, action, pageSize = 20, showPagination = true }) {
+function MovieListPageTemplate({ movies, title, action, pageSize = 20, showPagination = true, sortByDate = true }) {
   const [nameFilter, setNameFilter] = useState("");
   const [genreFilter, setGenreFilter] = useState("0");
   const [page, setPage] = useState(1);
   const genreId = Number(genreFilter);
 
-  let displayedMovies = movies
+  // Optionally sort movies by release date (newest first)
+  const sourceMovies = Array.isArray(movies) ? movies.slice() : [];
+  if (sortByDate) {
+    sourceMovies.sort((a, b) => {
+      const ta = Date.parse(a && a.release_date ? a.release_date : '') || 0;
+      const tb = Date.parse(b && b.release_date ? b.release_date : '') || 0;
+      return tb - ta; // newest first
+    });
+  }
+
+  let displayedMovies = sourceMovies
     .filter((m) => {
       return m.title.toLowerCase().search(nameFilter.toLowerCase()) !== -1;
     })

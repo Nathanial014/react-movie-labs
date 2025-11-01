@@ -21,11 +21,17 @@ const UpcomingMoviesPage = (props) => {
   }  
   
   const movies = data.results;
+  // sort upcoming movies by release date: nearest (soonest) first, then later dates
+  const sortedMovies = Array.isArray(movies) ? [...movies].sort((a, b) => {
+    const ta = Date.parse(a && a.release_date ? a.release_date : '') || Infinity;
+    const tb = Date.parse(b && b.release_date ? b.release_date : '') || Infinity;
+    return ta - tb; // earliest (soonest) first
+  }) : movies;
 
      return (
       <PageTemplate
         title="Upcoming Movies"
-        movies={movies}
+    movies={sortedMovies}
         action={(movie) => {
           return <AddToWatchIcon movie={movie} />
         }}

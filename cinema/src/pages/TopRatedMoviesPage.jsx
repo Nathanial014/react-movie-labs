@@ -25,6 +25,7 @@ const TopRatedMoviesPage = () => {
     <PageTemplate
       title="Top Rated Movies"
       movies={movies}
+      sortByDate={false}
       action={(movie) => {
         return <AddToFavoritesIcon movie={movie} />
       }}
