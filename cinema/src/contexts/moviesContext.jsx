@@ -1,5 +1,6 @@
 import { add } from "lodash";
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from './authContext';
 
 export const MoviesContext = React.createContext(null);
 
@@ -8,15 +9,34 @@ const MoviesContextProvider = (props) => {
   const [myReviews, setMyReviews] = useState( {} ) 
   const [watchlist, setWatchlist] = useState( [] )
 
+  const auth = useContext(AuthContext);
+
+  // persist favorites per authenticated user (or guest)
+  const favStorageKey = auth && auth.user && auth.user.email ? `favorites_${auth.user.email}` : 'favorites_guest';
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(favStorageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setFavorites(parsed);
+      }
+    } catch (e) {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favStorageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(favStorageKey, JSON.stringify(favorites));
+    } catch (e) {}
+  }, [favorites, favStorageKey]);
+
   const addToFavorites = (movie) => {
-    let newFavorites = [];
-    if (!favorites.includes(movie.id)){
-      newFavorites = [...favorites, movie.id];
-    }
-    else{
-      newFavorites = [...favorites];
-    }
-    setFavorites(newFavorites)
+    let newFavorites = favorites.slice();
+    if (!newFavorites.includes(movie.id)) newFavorites.push(movie.id);
+    setFavorites(newFavorites);
   };
 
   const addToWatchlist = (movie) => {
