@@ -22,7 +22,8 @@ const MoviesPage = (props) => {
     return <h1>{error.message}</h1>
   }  
   
-  const movies = data.results;
+  // Defensive: ensure any TV items accidentally present are filtered out
+  const movies = (data.results || []).filter(m => !(m.media_type === 'tv' || m.isTv));
 
      return (
       <PageTemplate

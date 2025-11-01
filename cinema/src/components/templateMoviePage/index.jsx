@@ -10,18 +10,21 @@ import { MoviesContext } from '../../contexts/moviesContext';
 import Rating from '@mui/material/Rating';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { getMovieImages } from "../../api/tmdb-api";
+import { getMovieImages, getTvImages } from "../../api/tmdb-api";
 
 const TemplateMoviePage = ({ movie, children }) => {
   // carousel state (declare hooks unconditionally to preserve hook order)
   const [current, setCurrent] = useState(0);
 
+  // choose movie vs tv image fetcher depending on the item
+  const isTv = movie && (movie.media_type === 'tv' || movie.isTv);
+  const imageQueryFn = isTv ? getTvImages : getMovieImages;
   const { data, error, isPending, isError } = useQuery({
-    queryKey: ['images', { id: movie.id }],
-    queryFn: getMovieImages,
+    queryKey: ['images', { id: movie.id, type: isTv ? 'tv' : 'movie' }],
+    queryFn: imageQueryFn,
   });
-  // compute images early so hooks are stable
-  const images = (data && data.posters) ? data.posters : [];
+  // normalize images: prefer posters, then backdrops
+  const images = (data && (data.posters || data.backdrops)) ? (data.posters || data.backdrops) : [];
 
   // carousel effect (declare unconditionally so hooks order is stable)
   useEffect(() => {
@@ -43,8 +46,7 @@ const TemplateMoviePage = ({ movie, children }) => {
   // If images is not an array, avoid breaking the page
   if (!Array.isArray(images)) return <Spinner />;
 
-  // debug
-  console.log('TemplateMoviePage images count', images.length);
+  // debug (keep minimal)
 
   const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
   const next = () => setCurrent((c) => (c + 1) % images.length);

@@ -32,7 +32,12 @@ function MovieListPageTemplate({ movies, title, action, pageSize = 20, showPagin
   useEffect(() => {
     if (!runtimeFilter || (runtimeFilter.min <= 0 && runtimeFilter.max <= 0)) return;
     // find ids missing runtime and not yet fetched
-    const missing = sourceMovies.filter(m => (!m.runtime && !enrichedMap[m.id])).slice(0, 50).map(m => m.id);
+    // exclude TV items from movie-detail enrichment (they use TV endpoints)
+    const missing = sourceMovies
+      .filter(m => !(m.media_type === 'tv' || m.isTv))
+      .filter(m => (!m.runtime && !enrichedMap[m.id]))
+      .slice(0, 50)
+      .map(m => m.id);
     if (missing.length === 0) return;
 
     let cancelled = false;
