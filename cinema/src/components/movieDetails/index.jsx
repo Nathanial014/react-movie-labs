@@ -161,13 +161,15 @@ function CreditsSection({ movieId }) {
       <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
         {credits.slice(0, 20).map((c) => (
           <Box key={c.cast_id || c.credit_id} sx={{ minWidth: 120, textAlign: 'center' }}>
-            <img
-              src={c.profile_path ? `https://image.tmdb.org/t/p/w185/${c.profile_path}` : '/public/no-image.png'}
-              alt={c.name}
-              style={{ width: '100%', height: 'auto', borderRadius: 8 }}
-            />
-            <Typography variant="body2" sx={{ color: 'white' }}>{c.name}</Typography>
-            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>{c.character}</Typography>
+            <a href={`/person/${c.id}`} style={{ textDecoration: 'none' }}>
+              <img
+                src={c.profile_path ? `https://image.tmdb.org/t/p/w185/${c.profile_path}` : '/no-image.png'}
+                alt={c.name}
+                style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+              />
+              <Typography variant="body2" sx={{ color: 'white' }}>{c.name}</Typography>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>{c.character}</Typography>
+            </a>
           </Box>
         ))}
       </Box>
